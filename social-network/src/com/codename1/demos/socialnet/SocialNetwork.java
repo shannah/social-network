@@ -1,11 +1,21 @@
 package com.codename1.demos.socialnet;
 
 
+import com.codename1.io.Log;
+import com.codename1.ui.Button;
+import com.codename1.ui.Container;
+import com.codename1.ui.Dialog;
 import com.codename1.ui.Display;
 import com.codename1.ui.Form;
+import com.codename1.ui.Label;
+import com.codename1.ui.TextField;
+import com.codename1.ui.layouts.BorderLayout;
+import com.codename1.ui.layouts.BoxLayout;
+import com.codename1.ui.plaf.Style;
 import com.codename1.ui.plaf.UIManager;
 import com.codename1.ui.util.Resources;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * The main lifecycle class for the social network app.
@@ -15,6 +25,9 @@ public class SocialNetwork {
 
     private Form current;
     private Resources theme;
+    
+    // REST client to interact with social network server
+    private SocialClient client;
    
     public void init(Object context) {
         try {
@@ -36,6 +49,9 @@ public class SocialNetwork {
             }
         });*/
         
+        
+        // Initialize the REST client
+        client = new SocialClient();
     }
     
     public void start() {
@@ -59,7 +75,64 @@ public class SocialNetwork {
      * Shows the login form.
      */
     public void showLoginForm() {
-       
+       Form f = new Form("Login");
+        
+        Container padding = new Container();
+        Style s = new Style();
+        s.setPadding(0, 15, 5, 5);
+        s.setPaddingUnit(new byte[]{
+            Style.UNIT_TYPE_DIPS, 
+            Style.UNIT_TYPE_DIPS,
+            Style.UNIT_TYPE_DIPS,
+            Style.UNIT_TYPE_DIPS
+        });
+        
+        
+        padding.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        padding.addComponent(new Label("Username"));
+        TextField usernameField = new TextField();
+        TextField passwordField = new TextField();
+        passwordField.setConstraint(TextField.PASSWORD);
+        padding.addComponent(usernameField);
+        padding.addComponent(new Label("Password"));
+        padding.addComponent(passwordField);
+        
+        Button loginButton = new Button("Login");
+        loginButton.addActionListener((e)->{
+            try {
+                client.login(usernameField.getText(), passwordField.getText());
+                
+            } catch (Exception ex) {
+                Dialog.show("Login Failed", ex.getMessage(), "OK", "Cancel");
+                return;
+            }
+            
+            try {
+                
+                java.util.List<Map> friends = client.getFriends();
+                if (friends.isEmpty()) {
+                    showSendFriendRequestForm();
+                } else {
+                    showFeed();
+                }
+            } catch (Exception ex) {
+                Log.e(ex);
+                Dialog.show("Friend Lookup Failed", ex.getMessage(), "OK", "Cancel");
+                return;
+            }
+        });
+        
+        padding.addComponent(loginButton);
+        
+        Button registerButton = new Button("Register");
+        registerButton.addActionListener((e) -> {
+           showRegisterForm(); 
+        });
+        
+        padding.addComponent(registerButton);
+        f.setLayout(new BorderLayout());
+        f.addComponent(BorderLayout.CENTER, padding);
+        f.show();
     }
     
     /**
