@@ -19,7 +19,6 @@ import com.codename1.ui.Label;
 import com.codename1.ui.TextArea;
 import com.codename1.ui.TextField;
 import com.codename1.ui.URLImage;
-import com.codename1.ui.animations.CommonTransitions;
 import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.layouts.BorderLayout;
 import com.codename1.ui.layouts.BoxLayout;
@@ -35,12 +34,21 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The main lifecycle class for the social network app.
+ * @author shannah
+ */
 public class SocialNetwork {
 
     private Form current;
     private Resources theme;
+    
+    // REST client to interact with social network server
     private SocialClient client;
     
+    
+    // Image placeholders for use with URLImage to keep correct size
+    // for current device.  Initialized in init()
     Image defaultAvatarLarge;
     Image defaultAvatarSmall;
     Image fullWidthPlaceHolder;
@@ -64,9 +72,14 @@ public class SocialNetwork {
                 Log.sendLog();
             }
         });*/
+        
+        // Enable the "Hamburger" menu
         Display.getInstance().setCommandBehavior(Display.COMMAND_BEHAVIOR_SIDE_NAVIGATION);
         
+        // Initialize the REST client
         client = new SocialClient();
+        
+        // Initialize the image placeholders
         int maxAvatarWidth = (int)Math.round(Math.min(Display.getInstance().getDisplayWidth(), Display.getInstance().getDisplayHeight()) * 0.75);
         Image avatar = theme.getImage("avatar_default_512.png");
         defaultAvatarLarge = avatar.scaled(maxAvatarWidth, maxAvatarWidth);
@@ -89,6 +102,8 @@ public class SocialNetwork {
             current.show();
             return;
         }
+        
+        // Show the login form to start the app
         showLoginForm();
     }
 
@@ -99,7 +114,9 @@ public class SocialNetwork {
     public void destroy() {
     }
     
-    
+    /**
+     * Shows the login form.
+     */
     public void showLoginForm() {
         Form f = new Form("Login");
         
@@ -161,10 +178,17 @@ public class SocialNetwork {
         f.show();
     }
     
+    /**
+     * Shows the specified error message in a modal dialog.
+     * @param msg 
+     */
     public void showError(String msg) {
         Dialog.show("Failed", msg, "OK", null);
     }
     
+    /**
+     * Shows the Registration Form
+     */
     public void showRegisterForm() {
         Form f = new Form("Register");
         final Form currentForm = Display.getInstance().getCurrent();
@@ -233,10 +257,19 @@ public class SocialNetwork {
         f.show();
     }
     
+    
+    /**
+     * Shows the profile of the current user.
+     */
     public void showProfile() {
         showProfile(client.getUsername());
     }
     
+    
+    /**
+     * Shows the profile of a given user.
+     * @param username 
+     */
     public void showProfile(String username) {
         try {
             Map profile = client.getProfile(username);
@@ -338,7 +371,10 @@ public class SocialNetwork {
         }
     }
     
-    
+    /**
+     * Shows form to add a post
+     * @param back The form to return to on completion.
+     */
     public void showAddPostForm(Form back) {
         Form f = new Form("Add Post");
         
@@ -396,6 +432,9 @@ public class SocialNetwork {
         
     }
     
+    /**
+     * Shows the news feed for the current user.
+     */
     public void showFeed() {
         Form f = new Form("Updates");
         addMenu(f);
@@ -459,13 +498,10 @@ public class SocialNetwork {
         
         f.show();
     }
-    
-    public void showPosts(String username) {
-        
-    }
-    
-    
-    
+   
+    /**
+     * Shows the friends of the current user.
+     */
     public void showFriends() {
         Form f = new Form("Friends");
         addMenu(f);
@@ -509,6 +545,9 @@ public class SocialNetwork {
         f.show();
     }
     
+    /**
+     * Shows the pending friend requests for the current user.
+     */
     public void showFriendRequests() {
         Form f = new Form("Pending Friend Requests");
         addMenu(f);
@@ -564,6 +603,9 @@ public class SocialNetwork {
         f.show();
     }
     
+    /**
+     * Shows form to search for users and invite to become friends.
+     */
     public void showSendFriendRequestForm() {
         Form f = new Form("Find New Friends");
         addMenu(f);
@@ -631,16 +673,11 @@ public class SocialNetwork {
         f.show();
     }
     
-    public void showSendFriendRequestForm(String username) {
-        
-    }
     
-    public void showAcceptFriendRequestForm(String username) {
-        
-    }
-    
-    
-    
+    /**
+     * Adds the hamburger menu to a form.
+     * @param f 
+     */
     private void addMenu(Form f) {
         f.addCommand(new Command("Profile") {
 
