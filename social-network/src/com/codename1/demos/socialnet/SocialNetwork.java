@@ -3,12 +3,14 @@ package com.codename1.demos.socialnet;
 
 import com.codename1.io.Log;
 import com.codename1.ui.Button;
+import com.codename1.ui.Command;
 import com.codename1.ui.Container;
 import com.codename1.ui.Dialog;
 import com.codename1.ui.Display;
 import com.codename1.ui.Form;
 import com.codename1.ui.Label;
 import com.codename1.ui.TextField;
+import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.layouts.BorderLayout;
 import com.codename1.ui.layouts.BoxLayout;
 import com.codename1.ui.plaf.Style;
@@ -135,11 +137,83 @@ public class SocialNetwork {
         f.show();
     }
     
+     /**
+     * Shows the specified error message in a modal dialog.
+     * @param msg 
+     */
+    public void showError(String msg) {
+        Dialog.show("Failed", msg, "OK", null);
+    }
+    
     /**
      * Shows the Registration Form
      */
     public void showRegisterForm() {
-       
+       Form f = new Form("Register");
+        final Form currentForm = Display.getInstance().getCurrent();
+        f.setBackCommand(new Command("Back") {
+
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                currentForm.showBack();
+            }
+            
+        });
+        Container padding = new Container();
+        Style s = new Style();
+        s.setPadding(0, 15, 5, 5);
+        s.setPaddingUnit(new byte[]{
+            Style.UNIT_TYPE_DIPS, 
+            Style.UNIT_TYPE_DIPS,
+            Style.UNIT_TYPE_DIPS,
+            Style.UNIT_TYPE_DIPS
+        });
+        
+        
+        padding.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        padding.addComponent(new Label("Username"));
+        TextField usernameField = new TextField();
+        TextField passwordField = new TextField();
+        passwordField.setConstraint(TextField.PASSWORD);
+        padding.addComponent(usernameField);
+        padding.addComponent(new Label("Password"));
+        padding.addComponent(passwordField);
+        
+        padding.addComponent(new Label("Password Verify"));
+        TextField passwordVerifyField = new TextField();
+        passwordVerifyField.setConstraint(TextField.PASSWORD);
+        padding.addComponent(passwordVerifyField);
+        
+        Button registerButton = new Button("Register");
+        registerButton.addActionListener((e) -> {
+            try {
+                client.register(usernameField.getText(), passwordField.getText());
+                client.login(usernameField.getText(), passwordField.getText());
+                
+                java.util.List<Map> friends = client.getFriends();
+                if (friends.isEmpty()) {
+                    showSendFriendRequestForm();
+                } else {
+                    showFeed();
+                }
+            } catch (Exception ex) {
+                Log.e(ex);
+                showError(ex.getMessage());
+            }
+        });
+        
+        
+        padding.addComponent(registerButton);
+        
+        Button cancelButton = new Button("Cancel");
+        cancelButton.addActionListener((e) -> {
+           currentForm.showBack(); 
+        });
+        padding.addComponent(cancelButton);
+        
+        f.setLayout(new BorderLayout());
+        f.addComponent(BorderLayout.CENTER, padding);
+        f.show();
     }
     
     
