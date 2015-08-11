@@ -289,7 +289,29 @@ public class SocialNetwork {
             
             Button screenName = new Button("Screen name: "+(String)profile.get("screen_name"));
             screenName.addActionListener((evt)->{
-                //TODO: Update screen name when clicked
+                if (!username.equals(client.getUsername())) {
+                    return;
+                }
+                TextField tf = new TextField();
+                tf.setText((String)profile.get("screen_name"));
+                tf.addActionListener((e)->{
+                    Map updates = new HashMap();
+                    updates.put("screen_name", tf.getText());
+                    try {
+                        client.updateProfile(updates);
+                        screenName.setText("Screen name: "+tf.getText());
+                        g.replaceAndWait(tf, screenName, null);
+                        g.revalidate();
+                    } catch (Exception ex) {
+                        Log.e(ex);
+                        showError(ex.getMessage());
+                        
+                    }
+                });
+                tf.setPreferredSize(screenName.getPreferredSize());
+                
+                g.replaceAndWait(screenName, tf, null);
+                g.revalidate();
             });
             
             g.addComponent(screenName);
@@ -298,7 +320,39 @@ public class SocialNetwork {
             f.addComponent(BorderLayout.CENTER, padding);
             
             avatarBtn.addActionListener((e) -> {
-                //TODO: Update avatar when clicked
+                 String photoPath = Capture.capturePhoto();
+                if (photoPath == null) {
+                    // User cancelled the photo
+                    return;
+                }
+                if (username == null ? client.getUsername() != null : !username.equals(client.getUsername())) {
+                    return;
+                }
+                try {
+                    Image img = Image.createImage(photoPath);
+                    if (img.getWidth() > 512 || img.getHeight() > 512) {
+                        img = img.scaledSmallerRatio(512, 512);
+                    } else if (img.getWidth() < 512 || img.getHeight() < 512) {
+                        img = img.scaledLargerRatio(512, 512);
+                    }
+                    Image replaceImg = img.scaledSmallerRatio(defaultAvatarLarge.getWidth(), defaultAvatarLarge.getHeight());
+                    avatarBtn.setIcon(replaceImg);
+
+                    Map updates = new HashMap();
+                    updates.put("username", username);
+                    
+                    EncodedImage encImg = null;
+                    if (img instanceof EncodedImage) {
+                        encImg = ((EncodedImage)encImg).scaledEncoded(img.getWidth(), img.getHeight());
+                    } else {
+                        encImg = EncodedImage.createFromImage(img, true).scaledEncoded(img.getWidth(), img.getHeight());
+                    }
+                    
+                    updates.put("avatar", encImg);
+                    client.updateProfile(updates);
+                } catch (Exception ex) {
+                    Log.e(ex);
+                }
             });
             
              
