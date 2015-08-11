@@ -404,7 +404,46 @@ public class SocialNetwork {
      * Shows the friends of the current user.
      */
     public void showFriends() {
-       
+        Form f = new Form("Friends");
+        addMenu(f);
+        f.setLayout(new BorderLayout());
+        
+        
+        MultiList list = new MultiList();
+        
+        final ArrayList<Map> resultListModel = new ArrayList<Map>();
+        try {
+            java.util.List<Map> friends = client.getFriends();
+            resultListModel.addAll(friends);
+            for (Map entry : resultListModel) {
+                entry.put("Line1", entry.get("screen_name"));
+                entry.put("Line2", entry.get("username"));
+                entry.put("Line3", "Click to accept");
+                
+                String avatarUrl =  (String)entry.get("avatar");
+                if (avatarUrl == null) {
+                    entry.put("icon", defaultAvatarSmall);
+                } else {
+                    entry.put("icon", URLImage.createToStorage((EncodedImage)defaultAvatarSmall, avatarUrl+"?small", avatarUrl, URLImage.RESIZE_SCALE_TO_FILL));
+                }
+            }
+            DefaultListModel model = new DefaultListModel(resultListModel);
+            list.setModel(model);
+            
+        } catch (Exception ex) {
+            showError(ex.getMessage());
+            return;
+        }
+        
+        
+        list.addActionListener((e) -> {
+            Map sel = (Map)list.getSelectedItem();
+            showProfile((String)sel.get("username"));
+        });
+        
+        f.addComponent(BorderLayout.CENTER, list);
+        
+        f.show();
     }
     
     /**
