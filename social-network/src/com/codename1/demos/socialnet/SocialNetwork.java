@@ -1,6 +1,7 @@
 package com.codename1.demos.socialnet;
 
 
+import com.codename1.capture.Capture;
 import com.codename1.components.InfiniteProgress;
 import com.codename1.components.SpanLabel;
 import com.codename1.io.Log;
@@ -14,6 +15,7 @@ import com.codename1.ui.EncodedImage;
 import com.codename1.ui.Form;
 import com.codename1.ui.Image;
 import com.codename1.ui.Label;
+import com.codename1.ui.TextArea;
 import com.codename1.ui.TextField;
 import com.codename1.ui.URLImage;
 import com.codename1.ui.events.ActionEvent;
@@ -28,6 +30,7 @@ import com.codename1.ui.util.Resources;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -274,7 +277,59 @@ public class SocialNetwork {
      * @param back The form to return to on completion.
      */
     public void showAddPostForm(Form back) {
+        Form f = new Form("Add Post");
         
+        f.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        TextArea commentField = new TextArea();
+        commentField.setRows(5);
+        commentField.setHint("Enter comment");
+
+        Button photoButton = new Button("Attach Photo");
+        photoButton.setTextPosition(Label.BOTTOM);
+        photoButton.addActionListener((evt)-> {
+            String file = Capture.capturePhoto(1024, -1);
+            if (file == null) {
+                return;
+            }
+            try {
+                Image img = Image.createImage(file).scaledSmallerRatio(256, 256);
+                photoButton.setIcon(img);
+                f.revalidate();
+            } catch (IOException ex) {
+                showError(ex.getMessage());
+                return;
+            }
+
+        });
+
+        Button submitButton = new Button("Submit");
+        submitButton.addActionListener((evt)->{
+            try {
+                Map vals = new HashMap();
+                vals.put("comment", commentField.getText());
+                
+                if (photoButton.getIcon() != null) {
+                    vals.put("photo", photoButton.getIcon());
+                }
+                long id = client.post(vals);
+                back.showBack();
+            } catch(Exception ex) {
+                showError(ex.getMessage());
+                return;
+            }
+        });
+        
+        Button cancelButton = new Button("Cancel");
+        cancelButton.addActionListener((evt)->{
+            back.showBack();
+        });
+        
+        f.addComponent(commentField);
+        f.addComponent(photoButton);
+        f.addComponent(submitButton);
+        f.addComponent(cancelButton);
+        
+        f.show();
         
     }
     
