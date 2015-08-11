@@ -288,7 +288,12 @@ public class SocialNetwork {
             ComponentGroup g = new ComponentGroup();
             
             Button screenName = new Button("Screen name: "+(String)profile.get("screen_name"));
+            boolean[] editingInProgress = new boolean[1];
             screenName.addActionListener((evt)->{
+                if (editingInProgress[0]) {
+                    return;
+                }
+                editingInProgress[0] = true;
                 if (!username.equals(client.getUsername())) {
                     return;
                 }
@@ -307,6 +312,7 @@ public class SocialNetwork {
                         showError(ex.getMessage());
                         
                     }
+                    editingInProgress[0] = false;
                 });
                 tf.setPreferredSize(screenName.getPreferredSize());
                 
