@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class SocialClient {
     private String token;
-    private static String URL = "http://localhost/social_network";
+    private static String URL = "http://cn-social-network-demo.weblite.ca";
     private String username;
     
     
