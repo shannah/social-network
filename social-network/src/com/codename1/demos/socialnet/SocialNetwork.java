@@ -1,18 +1,24 @@
 package com.codename1.demos.socialnet;
 
 
+import com.codename1.components.InfiniteProgress;
 import com.codename1.io.Log;
 import com.codename1.ui.Button;
 import com.codename1.ui.Command;
 import com.codename1.ui.Container;
 import com.codename1.ui.Dialog;
 import com.codename1.ui.Display;
+import com.codename1.ui.EncodedImage;
 import com.codename1.ui.Form;
+import com.codename1.ui.Image;
 import com.codename1.ui.Label;
 import com.codename1.ui.TextField;
+import com.codename1.ui.URLImage;
 import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.layouts.BorderLayout;
 import com.codename1.ui.layouts.BoxLayout;
+import com.codename1.ui.list.DefaultListModel;
+import com.codename1.ui.list.MultiList;
 import com.codename1.ui.plaf.Style;
 import com.codename1.ui.plaf.UIManager;
 import com.codename1.ui.util.Resources;
@@ -30,6 +36,12 @@ public class SocialNetwork {
     
     // REST client to interact with social network server
     private SocialClient client;
+    
+    // Image placeholders for use with URLImage to keep correct size
+    // for current device.  Initialized in init()
+    Image defaultAvatarLarge;
+    Image defaultAvatarSmall;
+    Image fullWidthPlaceHolder;
    
     public void init(Object context) {
         try {
@@ -51,9 +63,28 @@ public class SocialNetwork {
             }
         });*/
         
+        // Enable the "Hamburger" menu
+        Display.getInstance().setCommandBehavior(Display.COMMAND_BEHAVIOR_SIDE_NAVIGATION);
         
         // Initialize the REST client
         client = new SocialClient();
+        
+        // Initialize the image placeholders
+        int maxAvatarWidth = (int)Math.round(Math.min(Display.getInstance().getDisplayWidth(), Display.getInstance().getDisplayHeight()) * 0.75);
+        Image avatar = theme.getImage("avatar_default_512.png");
+        defaultAvatarLarge = avatar.scaled(maxAvatarWidth, maxAvatarWidth);
+        
+        maxAvatarWidth = (int)Math.round(Math.min(Display.getInstance().getDisplayWidth(), Display.getInstance().getDisplayHeight()) / 6.0);
+        defaultAvatarSmall = avatar.scaled(maxAvatarWidth, maxAvatarWidth);
+        if (!(defaultAvatarSmall instanceof EncodedImage)) {
+            defaultAvatarSmall = EncodedImage.createFromImage(defaultAvatarSmall, true);
+        }
+        
+        int fullWidthImage = (int)Math.round(Math.min(Display.getInstance().getDisplayWidth(), Display.getInstance().getDisplayHeight())) - 20;
+        fullWidthPlaceHolder = Image.createImage(fullWidthImage, (int)fullWidthImage * 9 / 16);
+        if (!(fullWidthPlaceHolder instanceof EncodedImage)) {
+            fullWidthPlaceHolder = EncodedImage.createFromImage(fullWidthPlaceHolder, true);
+        }
     }
     
     public void start() {
@@ -267,7 +298,87 @@ public class SocialNetwork {
      * Shows form to search for users and invite to become friends.
      */
     public void showSendFriendRequestForm() {
+        Form f = new Form("Find New Friends");
+        addMenu(f);
+        f.setLayout(new BorderLayout());
+        TextField search = new TextField();
+        search.setHint("Search user");
         
+        MultiList list = new MultiList();
+        list.setModel(new DefaultListModel());
+        
+        // TODO : Add DataChangeListener to search field
+        
+        // TODO : Add ActionListener to list
+        
+        f.addComponent(BorderLayout.NORTH, search);
+        f.addComponent(BorderLayout.CENTER, list);
+        
+        f.show();
+    }
+    
+     /**
+     * Adds the hamburger menu to a form.
+     * @param f 
+     */
+    private void addMenu(Form f) {
+        f.addCommand(new Command("Profile") {
+
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                showProfile();
+            }
+            
+        });
+        f.addCommand(new Command("News") {
+
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                showFeed();
+            }
+            
+        });
+        
+        f.addCommand(new Command("My Friends") {
+
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                showFriends();
+            }
+            
+        });
+        
+        f.addCommand(new Command("Pending Requests") {
+
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                showFriendRequests();
+            }
+            
+        });
+        
+        f.addCommand(new Command("Invite Friends") {
+
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                showSendFriendRequestForm();
+            }
+            
+        });
+        
+        f.addCommand(new Command("Logout") {
+
+            @Override
+            public void actionPerformed(ActionEvent evt) {
+                try {
+                    client.logout();
+                    showLoginForm();
+                } catch (Exception ex) {
+                    showError(ex.getMessage());
+                }
+            }
+            
+        });
     }
     
 
