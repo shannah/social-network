@@ -23,6 +23,7 @@ import com.codename1.ui.plaf.Style;
 import com.codename1.ui.plaf.UIManager;
 import com.codename1.ui.util.Resources;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -291,7 +292,58 @@ public class SocialNetwork {
      * Shows the pending friend requests for the current user.
      */
     public void showFriendRequests() {
+        Form f = new Form("Pending Friend Requests");
+        addMenu(f);
+        f.setLayout(new BorderLayout());
         
+        
+        MultiList list = new MultiList();
+        
+        final ArrayList<Map> resultListModel = new ArrayList<Map>();
+        try {
+            java.util.List<Map> requests = client.getPendingFriendRequests();
+            resultListModel.addAll(requests);
+            for (Map entry : resultListModel) {
+                entry.put("Line1", entry.get("screen_name"));
+                entry.put("Line2", entry.get("username"));
+                entry.put("Line3", "Click to accept");
+                
+                String avatarUrl =  (String)entry.get("avatar");
+                if (avatarUrl == null) {
+                    entry.put("icon", defaultAvatarSmall);
+                } else {
+                    entry.put("icon", URLImage.createToStorage((EncodedImage)defaultAvatarSmall, avatarUrl+"?small", avatarUrl, URLImage.RESIZE_SCALE_TO_FILL));
+                }
+            }
+            DefaultListModel model = new DefaultListModel(resultListModel);
+            list.setModel(model);
+            
+        } catch (Exception ex) {
+            showError(ex.getMessage());
+            return;
+        }
+        
+        
+        list.addActionListener((e) -> {
+            Map sel = (Map)list.getSelectedItem();
+            
+            if (Dialog.show("Accept Friend Request?", "Accept friend request from "+sel.get("screen_name")+"?", "Yes", "Cancel")) {
+                InfiniteProgress p = new InfiniteProgress();
+                Dialog dlg = p.showInifiniteBlocking();
+                try {
+                    client.acceptFriendRequest((String)sel.get("username"));
+                    Dialog.show("Request Accepted", "You are now friends with "+sel.get("screen_name"), "OK", null);
+                    showFriendRequests();
+                } catch (Exception ex) {
+                    showError(ex.getMessage());
+                }
+                dlg.dispose();
+            }
+        });
+        
+        f.addComponent(BorderLayout.CENTER, list);
+        
+        f.show();
     }
     
     /**
