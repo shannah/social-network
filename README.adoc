@@ -1,0 +1,7 @@
+= Social Network Tutorial
+Demo app for Codename One Webinar
+
+This app was created as a demonstration of http://www.codenameone.com[Codename One] for a webinar held August 11, 2015.  It consists of two parts:
+
+. https://github.com/shannah/social-network/tree/master/social-network[The Codename One client app]
+. https://github.com/shannah/social-network-server[A server app] (PHP/MySQL) 
