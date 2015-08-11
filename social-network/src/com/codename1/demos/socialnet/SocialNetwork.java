@@ -2,7 +2,9 @@ package com.codename1.demos.socialnet;
 
 
 import com.codename1.components.InfiniteProgress;
+import com.codename1.components.SpanLabel;
 import com.codename1.io.Log;
+import com.codename1.l10n.L10NManager;
 import com.codename1.ui.Button;
 import com.codename1.ui.Command;
 import com.codename1.ui.Container;
@@ -17,6 +19,7 @@ import com.codename1.ui.URLImage;
 import com.codename1.ui.events.ActionEvent;
 import com.codename1.ui.layouts.BorderLayout;
 import com.codename1.ui.layouts.BoxLayout;
+import com.codename1.ui.layouts.GridLayout;
 import com.codename1.ui.list.DefaultListModel;
 import com.codename1.ui.list.MultiList;
 import com.codename1.ui.plaf.Style;
@@ -24,6 +27,7 @@ import com.codename1.ui.plaf.UIManager;
 import com.codename1.ui.util.Resources;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Map;
 
 /**
@@ -278,7 +282,67 @@ public class SocialNetwork {
      * Shows the news feed for the current user.
      */
     public void showFeed() {
+        Form f = new Form("Updates");
+        addMenu(f);
+        f.setLayout(new BorderLayout());
         
+        Container buttons = new Container();
+        buttons.setLayout(new GridLayout(1, 2));
+        Button addPost = new Button("Add Post");
+        addPost.addActionListener((e)->{
+            showAddPostForm(f);
+        });
+        buttons.addComponent(addPost);
+        
+        
+        Container list = new Container();
+        list.setScrollableY(true);
+        list.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+        try {
+            java.util.List<Map> feed = client.getFeed(null);
+            for(Map item : feed) {
+                Container itemWrapper = new Container();
+                itemWrapper.setUIID("FeedItem");
+                itemWrapper.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+                
+                Container topRow = new Container();
+                topRow.setUIID("FeedItemTopRow");
+                topRow.setLayout(new BoxLayout(BoxLayout.X_AXIS));
+                String avatarUrl =  (String)item.get("avatar");
+                URLImage img = URLImage.createToStorage((EncodedImage)defaultAvatarSmall, avatarUrl+"?small", avatarUrl, URLImage.RESIZE_SCALE_TO_FILL);
+                topRow.addComponent(new Label(img));
+                
+                Container postDetails = new Container();
+                postDetails.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+                
+                postDetails.addComponent(new Label((String)item.get("screen_name")));
+                Label posted = new Label("Posted "+L10NManager.getInstance().formatDateTime(new Date(Long.parseLong((String)item.get("date_posted")))));
+                posted.setUIID("FeedDateLabel");
+                postDetails.addComponent(posted);
+                topRow.addComponent(postDetails);
+                itemWrapper.addComponent(topRow);
+                
+                itemWrapper.addComponent(new SpanLabel((String)item.get("comment")));
+                
+                if (item.get("photo") != null) {
+                    String photoUrl = (String)item.get("photo");
+                    URLImage photo = URLImage.createToStorage((EncodedImage)fullWidthPlaceHolder, photoUrl+"?"+Display.getInstance().getDisplayWidth(), photoUrl, URLImage.RESIZE_SCALE_TO_FILL);
+                    itemWrapper.addComponent(new Label(photo));
+                }
+                
+                list.addComponent(itemWrapper);
+                
+            }
+        } catch (IOException ex) {
+            showError(ex.getMessage());
+            return;
+        }
+        
+        f.addComponent(BorderLayout.NORTH, buttons);
+        f.addComponent(BorderLayout.CENTER, list);
+    
+        
+        f.show();
     }
    
     /**
