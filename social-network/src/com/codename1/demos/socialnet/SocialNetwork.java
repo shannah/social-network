@@ -307,7 +307,34 @@ public class SocialNetwork {
         MultiList list = new MultiList();
         list.setModel(new DefaultListModel());
         
-        // TODO : Add DataChangeListener to search field
+        search.addDataChangeListener((type, index) -> {
+            if (search.getText().length() > 2) {
+                try {
+                    java.util.List<Map> results = client.findUsers(search.getText());
+                    for (Map entry : results) {
+                        entry.put("Line1", entry.get("screen_name"));
+                        entry.put("Line2", entry.get("username"));
+                        if (Integer.parseInt((String)entry.get("is_friend")) == 1) {
+                            entry.put("Line3", "Already friends");
+                        } else if (Integer.parseInt((String)entry.get("has_pending_invite")) == 1) {
+                            entry.put("Line3", "Invite pending");
+                        } else {
+                            entry.put("Line3", "Click to invite");
+                        }
+                        String avatarUrl =  (String)entry.get("avatar");
+                        if (avatarUrl == null) {
+                            entry.put("icon", defaultAvatarSmall);
+                        } else {
+                            entry.put("icon", URLImage.createToStorage((EncodedImage)defaultAvatarSmall, avatarUrl+"?small", avatarUrl, URLImage.RESIZE_SCALE_TO_FILL));
+                        }
+                    }
+                    DefaultListModel model = new DefaultListModel(results);
+                    list.setModel(model);
+                } catch (Exception ex) {
+                    showError(ex.getMessage());
+                }
+            }
+        });
         
         // TODO : Add ActionListener to list
         
