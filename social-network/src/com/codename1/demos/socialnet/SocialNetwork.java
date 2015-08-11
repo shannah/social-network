@@ -12,7 +12,7 @@ public class SocialNetwork {
     private Form current;
     private Resources theme;
     
-    
+    //TODO Add REST client member
 
     public void init(Object context) {
         try {
@@ -34,6 +34,7 @@ public class SocialNetwork {
             }
         });*/
         
+        //TODO Initialize REST client
     }
     
     public void start() {
