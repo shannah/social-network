@@ -8,6 +8,7 @@ import com.codename1.io.Log;
 import com.codename1.l10n.L10NManager;
 import com.codename1.ui.Button;
 import com.codename1.ui.Command;
+import com.codename1.ui.ComponentGroup;
 import com.codename1.ui.Container;
 import com.codename1.ui.Dialog;
 import com.codename1.ui.Display;
@@ -260,7 +261,7 @@ public class SocialNetwork {
      * Shows the profile of the current user.
      */
     public void showProfile() {
-        
+        showProfile(client.getUsername());
     }
     
     
@@ -269,7 +270,44 @@ public class SocialNetwork {
      * @param username 
      */
     public void showProfile(String username) {
-        
+        try {
+            Map profile = client.getProfile(username);
+            Form f = new Form((String)profile.get("screen_name"));
+            addMenu(f);
+            f.setLayout(new BorderLayout());
+            Container padding = new Container();
+            padding.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+            Image avatar = defaultAvatarLarge;
+            if (profile.get("avatar") != null) {
+                String url = (String)profile.get("avatar");
+                avatar = URLImage.createToStorage((EncodedImage)avatar, url+"?large", url, URLImage.RESIZE_SCALE_TO_FILL);
+            }
+            Button avatarBtn = new Button(avatar);
+            padding.addComponent(avatarBtn);
+            
+            ComponentGroup g = new ComponentGroup();
+            
+            Button screenName = new Button("Screen name: "+(String)profile.get("screen_name"));
+            screenName.addActionListener((evt)->{
+                //TODO: Update screen name when clicked
+            });
+            
+            g.addComponent(screenName);
+            padding.addComponent(g);
+            
+            f.addComponent(BorderLayout.CENTER, padding);
+            
+            avatarBtn.addActionListener((e) -> {
+                //TODO: Update avatar when clicked
+            });
+            
+             
+            f.show();
+            
+            
+        } catch (Exception ex) {
+            showError(ex.getMessage());
+        }
     }
     
     /**
