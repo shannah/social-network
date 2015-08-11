@@ -371,7 +371,7 @@ public class SocialNetwork {
                 postDetails.setLayout(new BoxLayout(BoxLayout.Y_AXIS));
                 
                 postDetails.addComponent(new Label((String)item.get("screen_name")));
-                Label posted = new Label("Posted "+L10NManager.getInstance().formatDateTime(new Date(Long.parseLong((String)item.get("date_posted")))));
+                Label posted = new Label("Posted "+L10NManager.getInstance().formatDateTime(new Date(1000l*Long.parseLong((String)item.get("date_posted")))));
                 posted.setUIID("FeedDateLabel");
                 postDetails.addComponent(posted);
                 topRow.addComponent(postDetails);
