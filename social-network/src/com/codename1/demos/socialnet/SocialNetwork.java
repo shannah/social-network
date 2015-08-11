@@ -30,6 +30,8 @@ public class SocialNetwork {
     
     // REST client to interact with social network server
     private SocialClient client;
+    
+    //TODO Add image placeholders for common images types
    
     public void init(Object context) {
         try {
@@ -51,9 +53,12 @@ public class SocialNetwork {
             }
         });*/
         
+        //TODO Enable hamburger menu
         
         // Initialize the REST client
         client = new SocialClient();
+        
+        //TODO Initialize the image placeholders
     }
     
     public void start() {
@@ -267,7 +272,7 @@ public class SocialNetwork {
      * Shows form to search for users and invite to become friends.
      */
     public void showSendFriendRequestForm() {
-        
+        //TODO Implement show friend requests form
     }
     
 
