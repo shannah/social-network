@@ -336,7 +336,26 @@ public class SocialNetwork {
             }
         });
         
-        // TODO : Add ActionListener to list
+        list.addActionListener((e) -> {
+            Map sel = (Map)list.getSelectedItem();
+            if (Integer.parseInt((String)sel.get("is_friend")) == 1) {
+                return;
+            }
+            if (Integer.parseInt((String)sel.get("has_pending_invite")) == 1) {
+                return;
+            }
+            if (Dialog.show("Send Friend Request", "Send a frend request to "+sel.get("screen_name")+"?", "Send", "Cancel")) {
+                InfiniteProgress p = new InfiniteProgress();
+                Dialog dlg = p.showInifiniteBlocking();
+                try {
+                    client.sendFriendRequest((String)sel.get("username"));
+                    Dialog.show("Send Request Sent", "The request was successfully sent.", "OK", null);
+                } catch (Exception ex) {
+                    showError(ex.getMessage());
+                }
+                dlg.dispose();
+            }
+        });
         
         f.addComponent(BorderLayout.NORTH, search);
         f.addComponent(BorderLayout.CENTER, list);
