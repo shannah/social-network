@@ -319,12 +319,7 @@ public class SocialNetwork {
                 
                 g.replaceAndWait(screenName, tf, null);
                 g.revalidate();
-                
-                
-                
-                
-                
-                
+                tf.requestFocus();
             });
             
             g.addComponent(screenName);
